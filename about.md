@@ -1,9 +1,7 @@
 ---
 layout: page
 title: Video
-permalink: /about/
+permalink: /Video/
 ---
-
-###### Youtube Link
 
 This where our webcast will be
