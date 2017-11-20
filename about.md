@@ -1,9 +1,8 @@
 ---
 layout: page
-title: Video
+title: About
 permalink: /about/
 ---
 
-###### Youtube Link
 
-This where our webcast will be
+This is a final project for BST260
