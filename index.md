@@ -1,25 +1,50 @@
 ---
-# You don't need to edit this file, it's empty on purpose.
-# Edit theme's home layout instead if you wanna make some changes
-# See: https://jekyllrb.com/docs/themes/#overriding-theme-defaults
-layout: home
+layout: default
 ---
 
-### Group Members
-* Dan
-* Colby
-* Nate
-* David
+# [](#header-1)Video
 
+Here is a walkthrough of what we built. 
 
-### Overview and Motivation
+## [](#header-2)Overview and Motivation
 * Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
 
 ### Data
 * Source, scraping method, cleanup, etc.
 
 ### Exploratory Analysis
+* This is what we found.
+
+#### [](#header-4)Analysis
 
 ### Final Analysis
 * What did you learn about the data? How did you answer the questions? How can you justify your answers?
+
+
+### There's a horizontal rule below this.
+
+* * *
+
+
+### Small image
+
+![](https://assets-cdn.github.com/images/icons/emoji/octocat.png)
+
+### Large image
+
+![](https://guides.github.com/activities/hello-world/branching.png)
+
+
+Text can be **bold**, _italic_, or ~~strikethrough~~.
+
+[Link to another page](another-page).
+
+> This is a blockquote following a header.
+
+| head1        | head two          | three |
+|:-------------|:------------------|:------|
+| ok           | good swedish fish | nice  |
+| out of stock | good and plenty   | nice  |
+| ok           | good `oreos`      | hmm   |
+| ok           | good `zoute` drop | yumm  |
 
