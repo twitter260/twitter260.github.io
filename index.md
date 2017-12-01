@@ -2,10 +2,6 @@
 layout: default
 output: html_document
 ---
-```{r}
-library(shiny)
-shiny::includeHTML("https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/vN.html")
-```
 
 # [](#header-1)Video
 
