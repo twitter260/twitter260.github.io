@@ -1,7 +1,6 @@
 ---
 layout: default
 output: html_document
-runtime: shiny
 ---
 
 # [](#header-1)Video
