@@ -12,18 +12,16 @@ Here is a walkthrough of what we built.
 <iframe src="https://twitter260.shinyapps.io/wordcloudapp/" style="border: none; width: 440px; height: 900px"></iframe>
 
 
-## [](#header-2)Overview and Motivation
+## [](#header-2)Background
 * Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
 
-### Data
+### Purpose
 * Source, scraping method, cleanup, etc.
 
-### Exploratory Analysis
+### Methodology
 * This is what we found.
 
 #### [](#header-4)Analysis
-
-### Final Analysis
 * What did you learn about the data? How did you answer the questions? How can you justify your answers?
 
 
