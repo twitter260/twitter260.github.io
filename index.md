@@ -7,6 +7,10 @@ output: html_document
 
 Here is a walkthrough of what we built. 
 
+# Shiny App
+<iframe src="https://twitter260.shinyapps.io/wordcloudapp/" style="border: none; width: 440px; height: 900px"></iframe>
+
+
 ## [](#header-2)Overview and Motivation
 * Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
 
