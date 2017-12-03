@@ -1,5 +1,5 @@
 # Twitter Sentiment Analysis
-* **twitter260.github.io**
+* [twitter260.github.io](twitter260.github.io)
 * This is a final project for [Data Science I](datasciencelabs.github.io) at the [Harvard T.H. Chan School of Public Health](https://www.hsph.harvard.edu/)
 * Group Members: Daniel Briggs, Nate Hall, Colby Wilkinson, David Sasson
 * The source code for this project is in the `our_code` folder
