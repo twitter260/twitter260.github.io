@@ -7,11 +7,23 @@ output: html_document
 
 Here is a walkthrough of what we built. 
 
-# Shiny App
+## Shiny App
 
-<iframe src="https://twitter260.shinyapps.io/wordcloudapp/" style="border: none; width: 440px; height: 900px"></iframe>
+<iframe src="https://twitter260.shinyapps.io/wordcloudapp/" style="border: none; width: 500px; height: 900px"></iframe>
 
 ![](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/BreakdownOfComponents15.png)
+
+[Link to vN](vN).
+
+[Link to Centrality Table](CentralityTable).
+
+[Link to gi](gi).
+
+[Link to Interaction Tweets](InteractionTweets).
+
+[Link to Tweets Tops](TweetsTops).
+
+
 
 ## [](#header-2)Background
 * Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
@@ -43,6 +55,7 @@ Here is a walkthrough of what we built.
 Text can be **bold**, _italic_, or ~~strikethrough~~.
 
 [Link to another page](another-page).
+
 
 > This is a blockquote following a header.
 
