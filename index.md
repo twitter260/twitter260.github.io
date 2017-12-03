@@ -3,31 +3,40 @@ layout: default
 output: html_document
 ---
 
-# [](#header-1)Video
+# Video
 
-Here is a walkthrough of what we built. 
+## Motivation
 
-## [](#header-2)Background
-* Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
-
-### Purpose
-* Source, scraping method, cleanup, etc.
-
-### Methodology
-* This is what we found.
-
-#### [](#header-4)Analysis
-* What did you learn about the data? How did you answer the questions? How can you justify your answers?
+## Objectives
 
 
-### There's a horizontal rule below this.
+## Data Methodology
 
-## Shiny App
+#### Source
 
-[Here is the link](https://twitter260.shinyapps.io/wordcloudapp/)
+#### Scraping method
+
+#### Cleanup
 
 
-![](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/BreakdownOfComponents15.png)
+## Data Visualization
+
+##### Static Images
+
+![Breakdown](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/BreakdownOfComponents15.png)
+
+![LCC_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/Devel_LCC_time.png)
+
+![LCC examine](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCExamine.png)
+
+![Network Overall](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/NetworkOverall.png)
+
+![Network Overall Connectivity](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/NetworkOverallConnectivity.png)
+
+![Weights Overall Hist](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/WeightsOverallHist.png)
+
+
+##### Widgets
 
 [Link to vN](vN).
 
@@ -39,19 +48,15 @@ Here is a walkthrough of what we built.
 
 [Link to Tweets Tops](TweetsTops).
 
+##### Shiny App
 
+[Here is the link](https://twitter260.shinyapps.io/wordcloudapp/)
+
+
+### Main Findings
 
 
 * * *
-
-
-### Small image
-
-![](https://assets-cdn.github.com/images/icons/emoji/octocat.png)
-
-### Large image
-
-![](https://guides.github.com/activities/hello-world/branching.png)
 
 
 Text can be **bold**, _italic_, or ~~strikethrough~~.
