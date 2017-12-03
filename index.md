@@ -35,6 +35,13 @@ output: html_document
 
 ![Weights Overall Hist](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/WeightsOverallHist.png)
 
+![sentiment_share](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_share.png)
+
+![saturday_sentiment_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/saturday_sentiment_time.png)
+
+![sentiment_time_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_time_network.png)
+
+![trump_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/trump_network.png)
 
 ##### Widgets
 
@@ -47,6 +54,8 @@ output: html_document
 [Link to Interaction Tweets](InteractionTweets).
 
 [Link to Tweets Tops](TweetsTops).
+
+
 
 ##### Shiny App
 
