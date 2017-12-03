@@ -7,9 +7,25 @@ output: html_document
 
 Here is a walkthrough of what we built. 
 
+## [](#header-2)Background
+* Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
+
+### Purpose
+* Source, scraping method, cleanup, etc.
+
+### Methodology
+* This is what we found.
+
+#### [](#header-4)Analysis
+* What did you learn about the data? How did you answer the questions? How can you justify your answers?
+
+
+### There's a horizontal rule below this.
+
 ## Shiny App
 
-<iframe src="https://twitter260.shinyapps.io/wordcloudapp/" style="border: none; width: 500px; height: 900px"></iframe>
+[Here is the link](https://twitter260.shinyapps.io/wordcloudapp/)
+
 
 ![](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/BreakdownOfComponents15.png)
 
@@ -25,20 +41,6 @@ Here is a walkthrough of what we built.
 
 
 
-## [](#header-2)Background
-* Provide an overview of the project goals and the motivation for it. Consider that this will be read by people who did not see your project proposal.
-
-### Purpose
-* Source, scraping method, cleanup, etc.
-
-### Methodology
-* This is what we found.
-
-#### [](#header-4)Analysis
-* What did you learn about the data? How did you answer the questions? How can you justify your answers?
-
-
-### There's a horizontal rule below this.
 
 * * *
 
