@@ -5,6 +5,7 @@ library(stringr)
 library(lubridate)
 library(scales)
 library(knitr)
+library(chron)
 
 data("stop_words")
 tweets <- read.csv(url("https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/text_identities.csv"), stringsAsFactors = FALSE)
