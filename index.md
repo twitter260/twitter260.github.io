@@ -2,6 +2,11 @@
 layout: default
 output: html_document
 ---
+# Group Members
+* [Daniel Briggs](https://www.linkedin.com/in/danielebriggs/)
+* [Nate Hall](https://www.linkedin.com/in/nathan-hall-72a3b693/)
+* [Colby Wilkinson](https://www.linkedin.com/in/colby-wilkinson-b659b161/)
+* [David Sasson](https://www.linkedin.com/in/david-sasson/)
 
 # Video
 
@@ -46,6 +51,11 @@ From our dataset of tweets, we used the afinn and nrc datasets (separately) to a
 A large disconnected network formed between October 27th and October 29th. Focusing on the largest component of the graph, we discovered that a significant portion of those interactions occurred during Saturday, October 28th, with the highest rate of new interactions, represented by a new Twitter account interacting with a Twitter account already in the largest component, occurring on October 28th. This demonstrates that Twitter users are responding to the protests in real time. Using the same network, we identified the most active and influential accounts using centrality and hub score as our determining factors. These identified accounts were incorporated into the sentiment analysis as a comparative measure.
 
 ## Data Visualization
+
+### Wordcloud
+
+<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 900px; height: 600px"></iframe>
+
 
 ### Sentiment Analysis
 
@@ -93,14 +103,9 @@ The sixteen most active users are shown on the network. Their activity was deter
 The ten largest hubs are shown on the network. An interactive plot with hub scores and account centrality can be found [here](gi).
 
 
-##### Widgets
+##### Need to insert this Widget somewhere...
 
 [Link to vN](vN).
-
-
-##### Shiny App
-
-<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 900px; height: 600px"></iframe>
 
 
 ### Main Findings
