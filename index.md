@@ -59,7 +59,7 @@ output: html_document
 
 ##### Shiny App
 
-[Here is the link](https://twitter260.shinyapps.io/wordcloudapp/)
+<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 500px; height: 900px"></iframe>
 
 
 ### Main Findings
