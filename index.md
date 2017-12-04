@@ -43,6 +43,13 @@ output: html_document
 
 ![trump_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/trump_network.png)
 
+![LCC_hubs](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCC_hubs.png)
+
+![LCCConnectivity](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCConnectivity.png)
+
+![LCCExamine](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCExamine.png)
+
+
 ##### Widgets
 
 [Link to vN](vN).
@@ -54,6 +61,7 @@ output: html_document
 [Link to Interaction Tweets](InteractionTweets).
 
 [Link to Tweets Tops](TweetsTops).
+
 
 
 
