@@ -59,7 +59,7 @@ output: html_document
 
 ##### Shiny App
 
-<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 900px; height: 560px"></iframe>
+<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 900px; height: 600px"></iframe>
 
 
 ### Main Findings
