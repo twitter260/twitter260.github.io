@@ -59,26 +59,9 @@ output: html_document
 
 ##### Shiny App
 
-<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 500px; height: 900px"></iframe>
+<iframe src="https://twitter260.shinyapps.io/shiny_test/" style="border: none; width: 900px; height: 560px"></iframe>
 
 
 ### Main Findings
 
-
-* * *
-
-
-Text can be **bold**, _italic_, or ~~strikethrough~~.
-
-[Link to another page](another-page).
-
-
-> This is a blockquote following a header.
-
-| head1        | head two          | three |
-|:-------------|:------------------|:------|
-| ok           | good swedish fish | nice  |
-| out of stock | good and plenty   | nice  |
-| ok           | good `oreos`      | hmm   |
-| ok           | good `zoute` drop | yumm  |
 
