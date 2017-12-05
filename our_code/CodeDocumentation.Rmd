@@ -1,0 +1,823 @@
+---
+title: "Code Documentation"
+author: "Daniel Briggs"
+date: "December 4, 2017"
+output: html_document
+---
+
+This is the code that obtains the Tweets for analysis. 
+
+```{r, eval = FALSE}
+#load these packages
+x <- c('twitteR', 'ggplot2', 'dplyr', 'purrr','ROAuth', 'httr', 'base64enc', 'tm')
+lapply(x, require, character.only = T)
+
+#establish credentials
+download.file(url="http://curl.haxx.se/ca/cacert.pem", destfile="cacert.pem")
+
+#Credentials have been altered
+#Credentials can be obtained from https://developer.twitter.com/
+setup_twitter_oauth(consumer_key='"FEDNBJKXZAWLPCTQVGIRHMOUS"',
+                    consumer_secret='YRQIIJUCUEWUPZTPWFIDTEPXUUGGFJXZKSEXTXLWTVMIPZYVBI',
+                    access_token = "UIRWZFUEAUYRLSBSICBDTQKUZCDTWAYLCWMCDOHGVIBJGSFMKQ",
+                    access_secret = "LBSVUGJNJFXRGEUQUENPLWHBDRWRMDMFXXAHBIHGCCSGK")
+
+#Obtain the tweets
+tweets <- searchTwitter('', n = 500000, geocode = '35.846135,-86.393137,50mi', since = '2017-10-27', until = '2017-10-29')
+tweets_df <- tbl_df(map_df(tweets, as.data.frame))
+```
+
+This processess the Tweets obtained during the analysis.
+
+```{r}
+#load packages
+x <- c("readr", "stringr", "plyr", "tm", "stringi", "stringr", "tm", "RCurl")
+lapply(x, require, character.only = T)
+
+#read data and remove unneccesary variables
+url <- "https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/murfreesboro102817.csv"
+mbo <- read.csv(url(url), stringsAsFactors = FALSE)
+
+#remove variables personal to Daniel Briggs
+mbo$favorited <- NULL
+mbo$statusSource <- NULL
+mbo$retweeted <- NULL
+
+#identifies all english stopwords
+Stopwords <- stopwords(kind = "en")
+
+#user defined function for easy cleaning
+'%!in%' <- function(x,y)!('%in%'(x,y))
+
+#what we will clean
+mbo[,1] <- tolower(mbo[1:dim(mbo)[1],1])
+
+#remove stop words
+tweets <- unlist(lapply(mbo[,1], function(tweet) {
+    text <- unlist(strsplit(tweet, " "))
+    text <- text[text %!in% Stopwords]
+    tweet <- paste(text, collapse = " ")
+}))
+
+#removes URLS
+replace_reg <- "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https"
+
+for(i in 1:length(mbo[,1])){
+  tweet <-tweets[i]
+  tweet <- sub("rt ", "", tweet) #remove retweet 
+  tweet <- gsub("@\\w+", "", tweet) # remove at(@)
+  tweet <- gsub("&lt;3","",tweet) #removes ASCII hearts <3 
+  tweet <- gsub("&lt;|&gt;|&le;|&ge;","",tweet) #removes html <, >, <=, >=
+  tweet <- str_replace_all(tweet ,replace_reg, "")  # remove links https 
+  tweet <- gsub("[ |\t]{2,}", " ", tweet) # remove tabs 
+  tweet <- iconv(tweet, "latin1", "ASCII", sub="") #makes emojis readable 
+  tweet <- gsub("<[^>]+>", "", tweet) #removes remaining text from emojis
+  tweet <- gsub('[[:punct:] ]+',' ',tweet) #removes punctuation
+  tweet <- gsub("[\r|\n|\t|\v|\f]", "", tweet) #removes form feeds tabs etc
+  tweet <- gsub("^ ", "", tweet)  # remove blank spaces at the beginning
+  tweet <- gsub(" $", "", tweet) # remove blank spaces at the end
+  mbo[i,1] <- tweet
+}
+```
+
+We modify the time at which the Tweet was created. 
+
+```{r}
+myRound <- function (x, convert = TRUE)  {
+  as.Date(x)
+  x <- as.POSIXlt(x)
+  mins <- x$min
+  mult <- mins %/% 15
+  remain <- mins %% 15
+  if(remain > 7L || (remain == 7L && x$sec > 29))
+    mult <- mult + 1
+  if(mult > 3) {
+    x$min <- 0
+    x <- x + 3600
+  } else {
+    x$min <- 15 * mult
+  }
+  x <- trunc.POSIXt(x, units = "mins")
+  if(convert) {
+    x <- format(x, format = "%Y-%m-%d %H:%M")
+  }
+  x
+}
+```
+
+
+We perform the sentiment analysis in this code
+
+```{r}
+library(dplyr)
+library(tidytext)
+library(tidyverse)
+library(stringr)
+library(lubridate)
+library(scales)
+library(knitr)
+library(chron)
+data("stop_words")
+
+url <- "https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/text_identities.csv"
+tweets <- read.csv(url(url), stringsAsFactors = FALSE)
+
+tweet_text <- tweets %>%
+  distinct(created, screenName, text) %>%
+  mutate(created = ymd_hms(created))
+
+#Seperates tweets into one line per word
+
+tokens <- unnest_tokens(tweets, word, text, to_lower = TRUE) %>%
+  anti_join(stop_words)
+
+
+# each sentiment library provides a different method of assigning sentiment to a word
+
+#nrc assigns multiple sentiment to each word
+nrc_sentiments <- get_sentiments("nrc")
+
+#afinn assigns numeric value form -5 to 5 (-5 being most negative sentiment)
+afinn_sentiments <- get_sentiments("afinn")
+
+#Calculates mean sentiment by tweet
+
+tweets_afinn_sentiment <- tokens %>%
+  inner_join(afinn_sentiments, by = "word") %>%
+  group_by(screenName, created) %>%
+  mutate(tweet_sentiment = mean(score),
+         day = "", 
+         day = replace(day, str_sub(created, start = 9, end = 10) == "29", "Sunday"),
+         day = replace(day, str_sub(created, start = 9, end = 10) == "28", "Saturday"),
+         day = replace(day, str_sub(created, start = 9, end = 10) == "27", "Friday"),
+         minutes_15 = round(60 * 24 * as.numeric(times(str_sub(created, start = -8, end = -1))), 0),
+         minutes_15 = trunc(minutes_15/15)) %>%
+  ungroup() %>%
+  mutate(created = ymd_hms(created)) %>%
+  select(created, id, screenName, retweetCount, tweet_sentiment, day, minutes_15, replyToSN)
+
+
+# Rounding time of tweet to the nearest 15 minutes
+
+tweets_afinn_sentiment$round_qhr <- round_qhr <- as.POSIXct(round(as.double(tweets_afinn_sentiment$created)/(15*60))*(15*60), origin=(as.POSIXct('1970-01-01')))
+
+
+#sample of most negative tweets
+
+tweets_afinn_sentiment %>%
+  distinct(created, screenName, tweet_sentiment) %>%
+  inner_join(tweet_text, by = c("created", "screenName")) %>%
+  arrange(tweet_sentiment) %>%
+  head(20) %>%
+  kable()
+
+##Big players for network analysis
+
+network_stars <-  c("BigBoyVol", "BlueRaiderDJ", "Limbaugh2016", "ChadCaldwell24", 
+                    "dennisbrucemor1", "realDonaldTrump", "DeLoachJW", "jdbswim",
+                    "mikerapp", "ColeenC123", "cbrentv3", "BlakeShelton193",
+                    "justasking3time")
+
+
+#filter tweets for networks of big players, create network identifier
+
+network_stars_tweets <- tweets_afinn_sentiment %>%
+  filter(replyToSN %in% network_stars | screenName %in% network_stars) %>%
+  mutate(network = ifelse(replyToSN %in% network_stars, replyToSN, NA),
+         network = ifelse(is.na(network), screenName, replyToSN))
+
+#Plots
+
+# All tweets sentiment over time (saturday)
+
+
+saturday <-  tweets_afinn_sentiment %>%
+  filter(created < as.POSIXct("2017-10-28 17:30:00") & created > as.POSIXct("2017-10-28 02:00:00")) %>%
+  group_by(day, minutes_15) %>%
+  mutate(tweet_sentiment = mean(tweet_sentiment),
+         n = n(),
+         Positive = (tweet_sentiment > 0)) %>%
+  filter(day == "Saturday") %>%
+  ggplot(aes(x = round_qhr, y = tweet_sentiment)) +
+  geom_point(aes(size = n, color = Positive), alpha = 0.75) +
+  geom_smooth(color = "orange", linetype = "dotted") +
+  scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("2 hour")) +
+  scale_y_continuous(limits = c(-2, 2)) +
+  xlab("Hour") +
+  ylab("Average Twitter Sentiment") +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 03:00:00"), y = -2, xend = as.POSIXct("2017-10-28 03:00:00"), yend = -0.5), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 03:00:00"), y = -0.35, label = "Murfreesboro: Police \n close town square"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 09:00:00"), y = 2, xend = as.POSIXct("2017-10-28 09:00:00"), yend = 1.6), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 09:00:00"), y = 1.5, label = "Shelbyville: Law enforcement \n arrives in riot gear"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 10:15:00"), y = -2, xend = as.POSIXct("2017-10-28 10:15:00"), yend = -1.6), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 10:15:00"), y = -1.5, label = "Shelbyville: First white nationalist \n and counter-protestors arrive"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 12:00:00"), y = 2, xend = as.POSIXct("2017-10-28 12:00:00"), yend = -0.65), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 12:00:00"), y = -0.75, label = "Shelbyville: 400 counter-protestors, \n 200 white nationalists on site"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 14:00:00"), y = 2, xend = as.POSIXct("2017-10-28 14:00:00"), yend = -0.2), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 15:30:00"), y = -0.3, label = "Shelbyville: White nationalists elect \n to move to Murfeesboro"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 16:00:00"), y = -2, xend = as.POSIXct("2017-10-28 16:00:00"), yend = -1.25), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 16:30:00"), y = -1.1, label = "Murfreesboro rally fizzles \n as white nationalist numbers dwindle"), size = 4, data = data.frame()) +
+  ggtitle("Average Sentiment during Murfreesboro/Shelbyville Protest") +
+  theme(legend.title = element_text(size = 15), legend.text = element_text(size = 10), plot.title = element_text(hjust = 0.5, size = 25), axis.text = element_text(size = 15), axis.title = element_text(size = 15)) 
+
+
+# Big player networks over time
+
+saturday_stars <- network_stars_tweets %>%
+  filter(created < as.POSIXct("2017-10-28 17:30:00") & created > as.POSIXct("2017-10-28 02:00:00")) %>%
+  group_by(day, minutes_15) %>%
+  mutate(tweet_sentiment = mean(tweet_sentiment),
+         n = n(),
+         Positive = (tweet_sentiment > 0)) %>%
+  filter(day == "Saturday") %>%
+  ggplot(aes(x = round_qhr, y = tweet_sentiment)) +
+  geom_point(aes(size = n, color = Positive), alpha = 0.75) +
+  geom_smooth(color = "orange", linetype = "dotted", se = FALSE) +
+  scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("4 hour")) +
+  scale_y_continuous(limits = c(-3, 3)) +
+  xlab("Hour") +
+  ylab("Average Twitter Sentiment") +
+  facet_wrap(~network, nrow = 3) +
+  ggtitle("Average Sentiment during Murfreesboro/Shelbyville Protest by Network") +
+  theme(legend.title = element_text(size = 15), legend.text = element_text(size = 10), plot.title = element_text(hjust = 0.5, size = 15), axis.text = element_text(size = 8), axis.title = element_text(size = 15)) 
+
+  
+
+# NRC sentiments for networks
+
+tweets_nrc_sentiment <- tokens %>%
+  inner_join(nrc_sentiments, by = "word") %>%
+  mutate(day = "", 
+         day = replace(day, str_sub(created, start = 9, end = 10) == "29", "Sunday"),
+         day = replace(day, str_sub(created, start = 9, end = 10) == "28", "Saturday"),
+         day = replace(day, str_sub(created, start = 9, end = 10) == "27", "Friday"),
+         minutes_15 = round(60 * 24 * as.numeric(times(str_sub(created, start = -8, end = -1))), 0),
+         minutes_15 = trunc(minutes_15/15),
+         created = ymd_hms(created)) %>%
+  select(created, id, screenName, retweetCount, sentiment, day, minutes_15, replyToSN) %>%
+  filter(replyToSN %in% network_stars | screenName %in% network_stars) %>%
+  mutate(network = ifelse(screenName %in% network_stars, screenName, NA),
+         network = replace(network, replyToSN %in% network_stars, replyToSN))
+
+tweets_nrc_sentiment$round_qhr <- round_qhr <- as.POSIXct(round(as.double(tweets_nrc_sentiment$created)/(15*60))*(15*60), origin=(as.POSIXct('1970-01-01')))
+
+# nrc count of sentiments over time
+
+sentiment_nrc_time <- tweets_nrc_sentiment %>%
+  group_by(day, minutes_15) %>%
+  mutate(n_time = n()) %>%
+  ungroup() %>%
+  group_by(day, minutes_15, sentiment) %>%
+  mutate(n_sentiment = n(), sentiment_share = n_sentiment/n_time) %>%
+  ungroup() %>%
+  mutate(sentiment_overall = ifelse(sentiment %in% c("fear", "anticipation", "surprise"), "Suspense", NA),
+         sentiment_overall = replace(sentiment_overall, sentiment %in% c("positive", "joy", "trust"), "Positive"),
+         sentiment_overall = replace(sentiment_overall, is.na(sentiment_overall), "Negative")) %>%
+  distinct(sentiment, day, round_qhr, n_time, n_sentiment, sentiment_share, created, sentiment_overall)
+
+
+
+#Plot of sentiment share over time
+
+sentiment_share <- sentiment_nrc_time %>%
+  filter(created < as.POSIXct("2017-10-28 17:30:00") & created > as.POSIXct("2017-10-28 02:00:00")) %>%
+  filter(day == "Saturday") %>%
+  ggplot(aes(x = round_qhr, y = sentiment_share, color = sentiment)) + 
+  geom_smooth(se = FALSE) +
+  facet_grid(~sentiment_overall)
+
+
+#timeline of events
+
+"source: http://www.tennessean.com/story/news/2017/10/28/white-lives-matter-rally-murfreesboro-tn-live-updates-shelbyville-tn-stream-video/804380001/"
+
+#nrc anticipation and anger over time
+
+sentiment_share_limited <- sentiment_nrc_time %>%
+  mutate(Sentiment = sentiment, n = n_sentiment) %>%
+  filter(created < as.POSIXct("2017-10-28 17:30:00") & created > as.POSIXct("2017-10-28 02:00:00")) %>%
+  filter(day == "Saturday" & sentiment %in% c("anticipation", "anger")) %>%
+  ggplot(aes(x = round_qhr, y = sentiment_share)) + 
+  geom_point(aes(size = n, color = Sentiment), alpha = 0.35) +
+  geom_smooth(se = FALSE, aes(color = sentiment)) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 03:00:00"), y = 0.4, xend = as.POSIXct("2017-10-28 03:00:00"), yend = 0.215), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 03:00:00"), y = 0.20, label = "Murfreesboro: Police \n close town square"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 09:00:00"), y = 0, xend = as.POSIXct("2017-10-28 09:00:00"), yend = 0.135), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 09:00:00"), y = 0.15, label = "Shelbyville: Law enforcement \n arrives in riot gear"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 10:15:00"), y = 0.4, xend = as.POSIXct("2017-10-28 10:15:00"), yend = 0.285), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 10:15:00"), y = 0.3, label = "Shelbyville: First white nationalist \n and counter-protestors arrive"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 12:00:00"), y = 0, xend = as.POSIXct("2017-10-28 12:00:00"), yend = 0.07), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 12:00:00"), y = 0.085, label = "Shelbyville: 400 counter-protestors, \n 200 white nationalists on site"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 14:00:00"), y = 0.4, xend = as.POSIXct("2017-10-28 14:00:00"), yend = 0.27), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 14:20:00"), y = 0.255, label = "Shelbyville: White nationalists elect \n to move to Murfeesboro"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 16:00:00"), y = 0, xend = as.POSIXct("2017-10-28 16:00:00"), yend = 0.035), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 16:30:00"), y = 0.05, label = "Murfreesboro rally fizzles \n as white nationalist numbers dwindle"), size = 4, data = data.frame()) +
+  ggtitle("Sentiment Share during Murfreesboro/Shelbyville Protest") +
+  theme(legend.title = element_text(size = 18), legend.text = element_text(size = 15), plot.title = element_text(hjust = 0.5, size = 25), axis.text = element_text(size = 15), axis.title = element_text(size = 15)) +
+  scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("2 hour")) +
+  scale_y_continuous(limits = c(0, 0.4)) +
+  xlab("Hour") +
+  ylab("Share of Total Sentiments Expressed")
+
+
+#limitations
+
+#assignment of afinn sentiments are somewhat arbitrary and may not have the context for specific events
+
+afinn_sentiments %>%
+  filter(word %in% c("absentee", "aboard", "apocalyptic", "cheer", "cheat", "charm", "damn", "rejoice", "prick", "thrilled")) %>%
+  arrange(score)
+
+afinn_sentiments %>%
+  summarise(sum(word %in% c("confederate", "nazi", "kkk")))
+
+# Some tweets cannot be assigned a sentiment (improper spelling, slang terms, etc.)
+
+tweet_text %>%
+  anti_join(tweets_afinn_sentiment, by = c("created", "screenName")) %>%
+  mutate(key_word = str_detect(text, paste(c("nazi", "kkk", "supremacy"),collapse = '|'))) %>%
+  filter(key_word == TRUE) %>%
+  select(screenName, text) %>%
+  head(10)
+
+
+# sentiment analysis can't correct spelling
+
+tweet_text %>%
+  filter(screenName == "justasking3time") %>%
+  select(text) %>%
+  head(10)
+
+
+# nrc sentiments lack context as well
+
+nrc_sentiments %>%
+  filter(word %in% c("confederate", "nationalist", "trump", "president")) %>%
+  kable()
+
+
+# Friday average sentiment over time
+
+tweets_afinn_sentiment %>%
+  filter(created < as.POSIXct("2017-10-27 17:30:00") & created > as.POSIXct("2017-10-27 02:00:00")) %>%
+  group_by(day, minutes_15) %>%
+  mutate(tweet_sentiment = mean(tweet_sentiment),
+         n = n(),
+         Positive = (tweet_sentiment > 0)) %>%
+  filter(day == "Friday") %>%
+  ggplot(aes(x = round_qhr, y = tweet_sentiment)) +
+  geom_point(aes(size = n, color = Positive), alpha = 0.75) +
+  geom_smooth(color = "grey", linetype = "dotted") +
+  scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("2 hour")) +
+  scale_y_continuous(limits = c(-2, 2)) +
+  xlab("Hour") +
+  ylab("Average Twitter Sentiment")
+
+#Sunday average sentiment over time
+
+tweets_afinn_sentiment %>%
+  filter(created < as.POSIXct("2017-10-29 17:30:00") & created > as.POSIXct("2017-10-29 02:00:00")) %>%
+  group_by(day, minutes_15) %>%
+  mutate(tweet_sentiment = mean(tweet_sentiment),
+         n = n(),
+         Positive = (tweet_sentiment > 0)) %>%
+  filter(day == "Sunday") %>%
+  ggplot(aes(x = round_qhr, y = tweet_sentiment)) +
+  geom_point(aes(size = n, color = Positive), alpha = 0.75) +
+  geom_smooth(color = "grey", linetype = "dotted") +
+  scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("2 hour")) +
+  scale_y_continuous(limits = c(-2, 2)) +
+  xlab("Hour") +
+  ylab("Average Twitter Sentiment")
+
+
+
+# Trumps network
+
+trump <- network_stars_tweets %>%
+  filter(created < as.POSIXct("2017-10-28 17:30:00") & created > as.POSIXct("2017-10-28 02:00:00")) %>%
+  filter(network == "realDonaldTrump") %>%
+  group_by(day, minutes_15) %>%
+  mutate(tweet_sentiment = mean(tweet_sentiment),
+         n = n(),
+         Positive = (tweet_sentiment > 0)) %>%
+  filter(day == "Saturday") %>%
+  ggplot(aes(x = round_qhr, y = tweet_sentiment)) +
+  geom_point(aes(size = n, color = Positive), alpha = 0.75) +
+  geom_smooth(color = "orange", linetype = "dotted", se = FALSE) +
+  scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("4 hour")) +
+  xlab("Hour") +
+  ylab("Average Twitter Sentiment") +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 03:00:00"), y = -4, xend = as.POSIXct("2017-10-28 03:00:00"), yend = 0), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 03:00:00"), y = 0.1, label = "Murfreesboro: Police \n close town square"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 09:00:00"), y = 4, xend = as.POSIXct("2017-10-28 09:00:00"), yend = -0.4), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 09:00:00"), y = -0.5, label = "Shelbyville: Law enforcement \n arrives in riot gear"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 10:15:00"), y = -4, xend = as.POSIXct("2017-10-28 10:15:00"), yend = -2), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 10:15:00"), y = -1.9, label = "Shelbyville: First white nationalist \n and counter-protestors arrive"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 12:00:00"), y = 4, xend = as.POSIXct("2017-10-28 12:00:00"), yend = 0.6), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 11:35:00"), y = 0.5, label = "Shelbyville: 400 counter-protestors, \n 200 white nationalists on site"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 14:00:00"), y = 4, xend = as.POSIXct("2017-10-28 14:00:00"), yend = -0.1), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 15:30:00"), y = -0.2, label = "Shelbyville: White nationalists elect \n to move to Murfeesboro"), size = 4, data = data.frame()) +
+  geom_segment(mapping = aes(x = as.POSIXct("2017-10-28 16:00:00"), y = -4, xend = as.POSIXct("2017-10-28 16:00:00"), yend = -2.5), size = 0.2,
+               linetype = "dashed", data = data.frame()) +
+  geom_text(mapping = aes(x = as.POSIXct("2017-10-28 15:30:00"), y = -2.35, label = "Murfreesboro rally fizzles \n as white nationalist numbers dwindle"), size = 4, data = data.frame()) +
+  ggtitle("Donald Trump's Network during Murfreesboro/Shelbyville Protest") +
+  theme(legend.title = element_text(size = 12), legend.text = element_text(size = 9), plot.title = element_text(hjust = 0.5, size = 25), axis.text = element_text(size = 15), axis.title = element_text(size = 15))
+
+
+# Plots
+
+saturday
+saturday_stars
+trump
+sentiment_share_limited
+
+```
+
+```{r}
+#all the tools in the toolshed
+require(igraph)
+library(dplyr)
+library(tidytext)
+library(tidyverse)
+library(gplots)
+library(ggplot2)
+library(network)
+library(RColorBrewer)
+library(intergraph)
+library(ggnet)
+library(svgPanZoom)    
+library(DT) 
+library(ggrepel)
+library(Hmisc)
+library(ggnetwork)
+library(ggiraph)
+library(stringr)
+library(sna)
+
+#reads in the data and removes unnecessary variables
+url <- "https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/text_identities.csv"
+tweets <- read.csv(url(url), stringsAsFactors = FALSE)
+tweets$truncated <- NULL
+tweets$replyToSID <- NULL
+tweets$replyToUID <- NULL
+tweets$longitude <- NULL
+tweets$latitude <- NULL
+
+# Sentiments (-5,-4,...,4,5)
+afinn_sentiments <- get_sentiments("afinn")
+
+# separate each word
+tokens <- unnest_tokens(tweets, word, text, to_lower = TRUE) %>%
+  anti_join(stop_words)
+
+# Assign sentiment to each word
+tokens_afinn_sentiment <- tokens %>%
+  inner_join(afinn_sentiments) %>%
+  group_by(id, created) %>%
+  mutate(tweet_sentiment = mean(score)) 
+
+
+
+#only take unique combinations of participants
+dat <- unique(tokens_afinn_sentiment[c("X", "screenName", "replyToSN", "created", "retweetCount", "favoriteCount", "tweet_sentiment")])
+
+
+
+#those who tweet
+tweeters <- unique(dat$screenName)
+
+#those who are tweeted at
+ind <- !is.na(dat$replyToSN)
+responders <- unique(dat$replyToSN[ind])
+
+####weighted network
+#build the the adjacency matrix
+ind <- which(!is.na(dat$replyToSN))
+dat.matrix <- as.matrix(dat[ind,c("replyToSN","screenName","tweet_sentiment")]) 
+g.w <- graph.edgelist(dat.matrix[,1:2], directed = FALSE)
+
+#scale the vertices to degree size
+g.w <- igraph::simplify(g.w)
+deg <- igraph::degree(g.w, mode = 'all')
+V(g.w)$size <- sqrt(deg)*3
+
+#add the weights
+weights <- as.numeric(dat.matrix[,3])
+weights[weights == 0] <- 10^-6
+E(g.w)$weight <- weights
+```
+
+Visualize the overall graph!
+
+```{r}
+library(ggnetwork)
+#reprocess
+g.w <- igraph::simplify(g.w)
+gw <- g.w
+E(gw)$weight <- 1
+gw <- igraph::simplify(gw, edge.attr.comb="sum")
+V(gw)$weight <- igraph::degree(g.w, mode = 'all')
+#redo
+set.seed(1492)
+Dat <- ggnetwork(gw, layout="fruchtermanreingold", arrow.gap=0, cell.jitter=0)
+Dat$x <- as.vector(Dat$x)
+Dat$y <- as.vector(Dat$y)
+Dat$xend <- as.vector(Dat$xend)
+Dat$yend <- as.vector(Dat$yend)
+Dat$size <- as.vector(Dat$size)
+
+#makes the plot of the overall network
+ggplot(Dat) +
+  geom_edges(aes(x=x, y=y, xend = xend, yend = yend),
+             color="grey50", curvature=0.1, size=0.15, alpha=1/2) +
+  geom_nodes(data=Dat,
+             aes(x=x, y=y, xend=xend, yend=yend, size=sqrt(size)),
+             alpha=1/3) +
+  theme_blank() +
+  theme(legend.position="none") -> gg
+gg
+```
+
+Summary statistics of the overall set.
+
+```{r}
+g.w <- igraph::simplify(g.w)
+#summary about the degrees of this graph 
+PDF <- degree.distribution(g.w)
+CDF <- degree.distribution(g.w, cumulative = T)
+
+#Degree distribution of the graph
+plot(x = 0:max(igraph::degree(g.w)), y=1-CDF, pch=19, cex=0.5, col="orange", 
+     xlab="Degree", ylab="Frequency", type = 'o', main = "Degree Frequency")
+points(PDF, type = 'o', col = 'blue', cex = 0.5)
+legend(x = 57.5, y = 0.15, legend = c('Cumulative Frequency', 'Frequency'), col = c('orange','blue'), pch = c(19,1), lty = c(1,1), cex = 0.5, bty = 'n')
+
+#Distribution of weights of the graph
+weights <- data.frame(weights)
+ggplot(weights) + geom_histogram(aes(weights), fill = 'red', col = 'black', binwidth = 0.5) + xlab("Weights") + ylab("Weight Counts") + ggtitle("Weights of the Overall Network") + 
+   theme(plot.title = element_text(hjust = 0.5))
+
+#cluster size
+clusters <- data.frame(clusters = clusters(g.w)$csize)
+ggplot(clusters) + geom_histogram(aes(clusters), fill = 'purple', col = 'orange', bins = 20) + scale_y_log10() + scale_x_log10() + xlab("Cluster Size (Log-10)") + ylab("Counts (Log-10)")
+```
+
+Filter the overall network
+
+```{r}
+V(g.w)$comp <- igraph::components(g.w)$membership
+#isolate 15 largest componets
+comps <- as.numeric(names(sort(table(V(g.w)$comp), decreasing = T)[1:15]))
+
+#filtering
+ind <- which(V(g.w)$comp %in% comps)
+main <- induced_subgraph(g.w,ind)
+sum(table(V(main)$comp)[1])
+sum(table(V(main)$comp)[2:15])
+ind <- which(V(g.w)$comp %in% comps[1])
+LCC <- induced_subgraph(g.w,ind)
+weights.LCC <- E(LCC)$weight
+#distribution of weights of LCC
+ggplot(data.frame(weights.LCC)) + geom_histogram(aes(weights.LCC), fill = 'red', col = 'black', binwidth = 0.5) +  xlab("Weights") + ylab("Weight Counts") + ggtitle("Weights of the Largest Connected Component") + theme(plot.title = element_text(hjust = 0.5))
+
+#more filtering to examine the components
+positive <- delete_edges(main, E(main)[weight <= 10^-6])
+negative <- delete_edges(main, E(main)[weight > 10^-6])
+par(mfrow = c(2,2))
+plot(main, vertex.label = NA, layout = layout_with_mds(main), main = "Fifteen Largest Connected Components")
+plot(positive, vertex.label = NA, layout = layout_with_mds(positive), main = "Positive Connections\nin\n Largest Connected Components")
+plot(negative, vertex.label = NA, layout = layout_with_mds(negative), main = "Negative Connections\nin\n Largest Connected Components")
+plot(LCC, vertex.label = NA, layout = layout_with_mds(LCC), main = "Largest Connected Component")
+```
+
+Summary of the largest component
+
+```{r}
+plot(1- degree.distribution(LCC, cumulative = T), type = 'o', col = 'orange', xlab = "Degrees", ylab = "Frequency", pch = 19, main = "Degree Frequency")
+lines(degree.distribution(LCC, cumulative = F), type = 'o', col = 'blue')
+legend(x = 57.5, y = 0.15, legend = c('Cumulative Frequency', 'Frequency'), col = c('orange','blue'), pch = c(19,1), lty = c(1,1), cex = 0.5, bty = 'n')
+sum(count_triangles(LCC))
+cliques(LCC, min = 3)
+```
+
+Development of graph over time
+
+```{r}
+net <- network(intergraph::asNetwork(LCC),directed = F)
+
+# Get a data.frame of edges and add an arbitrary time unit
+dat <- as.data.frame(igraph::get.edgelist(LCC), stringsAsFactors = F) #get dataframe of edges
+colnames(dat)<-c("from", "to") #add column names
+dat$time <- round(seq.int(1,8,length.out=nrow(dat)),0) #add a time variable
+
+# Convert df to a matrix of when node present or absent
+tmp = data.frame(nodeid = c(dat$from,dat$to), time=dat$time) %>% group_by(nodeid) %>% 
+      filter(time==min(time)) %>% unique %>% arrange(nodeid)
+
+out <- sapply(tmp$time, function(i) c(rep(0, i-1), rep(1,8-i+1)))
+out[out==0]<-NA
+
+
+
+# Define vertex attribute activation as 1 or NA:
+net %v% "t1" = out[1,]
+net %v% "t2" = out[2,]
+net %v% "t3" = out[3,]
+net %v% "t4" = out[4,]
+net %v% "t5" = out[5,]
+net %v% "t6" = out[6,]
+net %v% "t7" = out[7,]
+net %v% "t8" = out[8,]
+
+
+#for color
+mycols <- rev(brewer.pal(9, "Greens")[-1]) #remove really overly light color
+
+# Set up the initial layout
+x = gplot.layout.fruchtermanreingold(net, NULL) 
+net %v% "x" = x[, 1]
+net %v% "y" = x[, 2]
+
+# Create ggnet2 plots removing inactive nodes and setting initial layout
+t1 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t1")
+t2 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t2")
+t3 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t3")
+t4 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t4")
+t5 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t5")
+t6 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t6")
+t7 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t7")
+t8 = ggnet2(net, mode = c("x", "y"), size = 0,  node.color = mycols[tmp$time], na.rm = "t8")
+
+
+
+# Set up some plot features
+b1 = theme(panel.background = element_rect(color = "grey50"),
+           plot.title = element_text(size=rel(2.1)))
+b2 = geom_point(aes(color = color), size = 1, color = "white")
+b3 =  geom_point(aes(color = color), size = 1, alpha = 0.4)
+b4 =  geom_point(aes(color = color), size = 1) 
+b5 =  guides(color = FALSE)
+y1 = scale_y_continuous(limits = range(x[, 2] * 1.1), breaks = NULL)
+x1 = scale_x_continuous(limits = range(x[, 1] * 1.1), breaks = NULL)
+
+# show each temporal network
+gridExtra::grid.arrange(t1 + x1 + y1  + ggtitle("t = 1") + b1 + b2 + b3 + b4 + b5,
+                        t2 + x1 + y1  + ggtitle("t = 2") + b1 + b2 + b3 + b4 + b5,
+                        t3 + x1 + y1  + ggtitle("t = 3") + b1 + b2 + b3 + b4 + b5,
+                        t4 + x1 + y1  + ggtitle("t = 4") + b1 + b2 + b3 + b4 + b5,
+                        t5 + x1 + y1  + ggtitle("t = 5") + b1 + b2 + b3 + b4 + b5,
+                        t6 + x1 + y1  + ggtitle("t = 6") + b1 + b2 + b3 + b4 + b5,
+                        t7 + x1 + y1  + ggtitle("t = 7") + b1 + b2 + b3 + b4 + b5,
+                        t8 + x1 + y1  + ggtitle("t = 8") + b1 + b2 + b3 + b4 + b5,
+                        nrow = 2)
+```
+
+Interactive plot of hubscore and centrality
+
+```{r}
+#name of the vertices
+handle <- V(LCC)$name
+#Centrality of vertices
+V(LCC)$size <- igraph::degree(LCC, mode = 'all')
+Centrality <- V(LCC)$size
+#hubscore of vertices
+V(LCC)$power <- hub.score(LCC)$vector
+hubscore <- V(LCC)$power
+
+df <- data.frame(handle = handle, centrality = Centrality, hub_score = hubscore, authority_score = authority.score(LCC)$vector)
+
+gg_point_0 <- ggplot(df, aes(x = centrality, y = hub_score, tooltip = handle, data_id = handle) ) + 
+  geom_point_interactive(size=1) + theme_bw() + theme(text = element_text(size = rel(5.5))) +ylab("Hub Score")+
+  xlab("Degree Centrality")
+
+tooltip_css <- "background-opacity:0;font-size: 200%;font-style:italic;padding:10px;border-radius:10px 20px 10px 20px;"
+
+gi <- ggiraph(code = {print(gg_point_0)}, tooltip_offx = 10, tooltip_offy = -30,tooltip_extra_css = tooltip_css, tooltip_opacity = .75,hover_css = "stroke:red;fill:red;stroke-width:7pt" )
+
+
+saveWidget(gi, file = "gi.html",selfcontained= T)
+
+gg_point_1 <- ggplot(df, aes(x = centrality, y = authority_score, tooltip = handle, data_id = handle) ) + 
+  geom_point_interactive(size=1) + theme_bw() + theme(text = element_text(size = rel(5.5))) +ylab("Authority Score")+
+  xlab("Degree Centrality")
+
+tooltip_css <- "background-opacity:0;font-size: 200%;font-style:italic;padding:10px;border-radius:10px 20px 10px 20px;"
+
+ga <- ggiraph(code = {print(gg_point_0)}, tooltip_offx = 10, tooltip_offy = -30,tooltip_extra_css = tooltip_css, tooltip_opacity = .75,hover_css = "stroke:red;fill:red;stroke-width:7pt" )
+ga
+
+```
+
+Pretty graph based on high centrality nodes
+
+```{r}
+t <- datatable(arrange(data_frame(Person=V(LCC)$name, Centrality=V(LCC)$size), desc(Centrality)))
+t
+
+colnames(dat) <- c("From:", "To:", "Times")
+tf <- datatable(arrange(dat, desc(Times)))
+tf
+
+g <- LCC
+g <- igraph::simplify(g, edge.attr.comb="sum")
+
+#redo
+set.seed(1492)
+Dat <- ggnetwork(g, layout="fruchtermanreingold", arrow.gap=0, cell.jitter=0)
+Dat$x <- as.vector(Dat$x)
+Dat$y <- as.vector(Dat$y)
+Dat$xend <- as.vector(Dat$xend)
+Dat$yend <- as.vector(Dat$yend)
+Dat$size <- as.vector(Dat$size)
+ggplot() +
+  geom_edges(data=Dat, 
+             aes(x=x, y=y, xend=xend, yend=yend),
+             color="grey50", curvature=0.1, size=0.15, alpha=1/2) +
+  geom_nodes(data=Dat,
+             aes(x=x, y=y, xend=xend, yend=yend, size=sqrt(size)),
+             alpha=1/3) +  
+  geom_label_repel(data=unique(Dat[Dat$size>15,c(1,2,6,7)]),
+                   aes(x=x, y=y, label=vertex.names), 
+                   size=2, color="#8856a7") +   
+  geom_label_repel(data=unique(Dat[Dat$power>0.10,c(1,2,6,7)]),
+                   aes(x=x, y=y, label=vertex.names), 
+                   size=2, color="#8856a7") +
+  theme_blank() +
+  theme(legend.position="none") -> gg
+gg
+```
+
+Content from the largest characters
+
+```{r}
+top <- unique(Dat[Dat$size>15,7])
+tweetstops <- read.csv("murfreesboro102817.csv", stringsAsFactors = F)
+tweetstops <- tweetstops %>% filter(replyToSN %in% top | screenName %in% top) 
+replace_reg <- "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https"
+for(i in 1:length(tweetstops[,1])){
+  tweet <- tweetstops[i,1]
+  tweet <- sub("rt ", "", tweet) #remove retweet 
+  tweet <- gsub("@\\w+", "", tweet) # remove at(@)
+  tweet <- gsub("&lt;3","",tweet) #removes ASCII hearts <3 
+  tweet <- gsub("&lt;|&gt;|&le;|&ge;","",tweet) #removes html <, >, <=, >=
+  tweet <- str_replace_all(tweet ,replace_reg, "")  # remove links https 
+  tweet <- gsub("[ |\t]{2,}", " ", tweet) # remove tabs 
+  tweet <- iconv(tweet, "latin1", "ASCII", sub="") #makes emojis readable 
+  tweet <- gsub("<[^>]+>", "", tweet) #removes remaining text from emojis
+  tweet <- gsub("[\r|\n|\t|\v|\f]", "", tweet) #removes form feeds tabs etc
+  tweet <- gsub("^ ", "", tweet)  # remove blank spaces at the beginning
+  tweet <- gsub(" $", "", tweet) # remove blank spaces at the end
+  tweetstops[i,1] <- capitalize(tweet)
+}
+topTweets <- tweetstops
+topTweets <- topTweets[,c(1,11,4)]
+TT <- datatable(topTweets)
+TT
+```
+
+Graph based on high hub score
+
+```{r}
+g <- LCC
+g <- igraph::simplify(g, edge.attr.comb="sum")
+Dat <- ggnetwork(g, layout="fruchtermanreingold", arrow.gap=0, cell.jitter=0)
+Dat$x <- as.vector(Dat$x)
+Dat$y <- as.vector(Dat$y)
+Dat$xend <- as.vector(Dat$xend)
+Dat$yend <- as.vector(Dat$yend)
+Dat$size <- as.vector(Dat$size)
+ggplot() +
+  geom_edges(data=Dat, 
+             aes(x=x, y=y, xend=xend, yend=yend),
+             color="grey50", curvature=0.1, size=0.1, alpha=1/2) +
+  geom_nodes(data=Dat,
+             aes(x=x, y=y, xend=xend, yend=yend, size=sqrt(size)),
+             alpha=1/3) +  
+  geom_label_repel(data=unique(Dat[Dat$power>0.10,c(1,2,6,7)]),
+                   aes(x=x, y=y, label=vertex.names), 
+                   size=2, color="#8856a7") + 
+  theme_blank() +
+  theme(legend.position="none") -> gg
+gg
+```
+
+
+
