@@ -87,6 +87,9 @@ Similarly to the overall network on a macro-level, the largest component contain
 The most interesting relationships were observed on the meso-level structure. The degree distribution of the largest connected component approximates the power law, with an average degree of 2.19. However, it was not uncommon to observe Twitter users with many connections; over five-percent of users had more than six connections and the top one-percent of accounts had no fewer than fifteen connections. Summarily, the network could be modeled as a scale-free network with preferential attachment partially determined by time.
 
 
+$$P(k) = \prod \left ( k_{i,j} \right ) \prod \left ( T_{j} \right )$$
+
+
 ![Degree frequency chart showing the distribution and cumulative distribution of degrees](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCConnectivity.png)
 
 The importance of the time-dependent preferential attachment is illustrated in the movie-pane image of the development of the graph. Seventy-eight percent of nodes had been added to the network by the sixth interval. Coincidentally, this time corresponds with the afternoon of the events in question. Ninety-two percent of nodes had been added to the network by the seventh interval which corresponds to the evening of the event in question. We observe that the network becomes nearly “complete” at this time. The probability of joining the network is also highest during these two contiguous time frames.  Two possible explanations for this phenomenon is people are either reaction to the protests retrospectively or people begin reacting to the University of Tennessee-University of Kentucky football game.
