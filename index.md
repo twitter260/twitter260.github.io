@@ -59,9 +59,22 @@ A large disconnected network formed between October 27th and October 29th. Focus
 
 
 ### Sentiment Analysis
+![Network Overall](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/NetworkOverall.png)
+This is the overall network representing every Twitter account that was active and all the tweets that were posted from 00:00:01, October 27th to 23:59:59, October 29th. The largest connected component can be found at the bottom of the network.
+
+
+![LCC_hubs](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCC_hubs.png)
+The ten largest hubs are shown on the network. An interactive plot with hub scores and account centrality can be found [here](gi).
 
 ![saturday_sentiment_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/saturday_sentiment_time.png)
 The average twitter sentiment throughout the day during the rally.  The size of the points is proportional to the number of tweets in each 15 minute interval, and the color of each point indicates of whether the mean sentiment is positive or negative for that interval.
+
+![sentiment_share](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_share.png)
+This plot shows the share of sentiments expressed that were classified as “anticipation” or “fear”.  The size of each point is representative of the number of each sentiments expressed in that particular 15 minute interval for both anticipation and fear.  A clear increase in the share of anticipation and fear sentiments is seen in the early stages of the Shelbyville rally, and a similarly dramatic decrease is seen as the second rally in Murfreesboro dissipates. 
+
+![LCC examine](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCExamine.png)
+The sixteen most active users are shown on the network. Their activity was determined by the number of connections made between them and other accounts within the network. Content involving these accounts can be found [here](TweetsTops).
+
 
 ![sentiment_time_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_time_network.png)
 Again the average sentiment over time is plotted against time.  However, the dataset is reduced to those tweets that were part of the largest network neighborhoods based on user interaction (tweets and/or replies).  The plots are then faceted  by network neighborhoods and fit with loess curves to examine the change in sentiment for each neighborhood over the course of the day
@@ -69,15 +82,9 @@ Again the average sentiment over time is plotted against time.  However, the dat
 ![trump_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/trump_network.png)
 This plot represents the average sentiment of the persons tweeting in Donald Trump’s twitter network during the White Lives Matter rally.  Interestingly, the sentiment if highest before the first rally in Shelbyville, and lowest when the Murfreesboro rally fails to manifest, which contrasts the general trend seen in the plot of all twitter users in the Murfreesboro/Shelbyville area.
 
-![sentiment_share](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_share.png)
-This plot shows the share of sentiments expressed that were classified as “anticipation” or “fear”.  The size of each point is representative of the number of each sentiments expressed in that particular 15 minute interval for both anticipation and fear.  A clear increase in the share of anticipation and fear sentiments is seen in the early stages of the Shelbyville rally, and a similarly dramatic decrease is seen as the second rally in Murfreesboro dissipates. 
+![LCC_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/Devel_LCC_time.png)
+The graph is sparsely connected up until the fifth time frame. By the seventh time frame, very few new accounts are beginning to interact with the network. Previously previously participating Twitter users are almost exclusively interacting with those in the network where a plurality of those users began participating over the course of the 28th of October, or the day of the protest. This tentatively supports the Twitter Revolution theory. 
 
-* * *
-
-### Network Analysis
-
-![Network Overall](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/NetworkOverall.png)
-This is the overall network representing every Twitter account that was active and all the tweets that were posted from 00:00:01, October 27th to 23:59:59, October 29th. The largest connected component can be found at the bottom of the network. 
 
 ![Network Overall Connectivity](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/NetworkOverallConnectivity.png)
 The degree distribution of the overall network shows both the cumulative frequency and frequency of each possible value of degree. The degree distribution approximately follows the power law which supports our description of the network as scale-free.
@@ -93,15 +100,6 @@ The degree distribution of the largest connected component shows both the cumula
 
 ![WeightsLCCHist](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/WeightsLCCHist.png)
 
-![LCC_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/Devel_LCC_time.png)
-The graph is sparsely connected up until the fifth time frame. By the seventh time frame, very few new accounts are beginning to interact with the network. Previously previously participating Twitter users are almost exclusively interacting with those in the network where a plurality of those users began participating over the course of the 28th of October, or the day of the protest. This tentatively supports the Twitter Revolution theory. 
-
-![LCC examine](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCExamine.png)
-The sixteen most active users are shown on the network. Their activity was determined by the number of connections made between them and other accounts within the network. Content involving these accounts can be found [here](TweetsTops).
-
-
-![LCC_hubs](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCC_hubs.png)
-The ten largest hubs are shown on the network. An interactive plot with hub scores and account centrality can be found [here](gi).
 
 
 ##### Need to insert this Widget somewhere...
