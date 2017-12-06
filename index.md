@@ -85,7 +85,7 @@ This plot represents the average sentiment of the persons tweeting in Donald Tru
 ![LCC_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/Devel_LCC_time.png)
 The graph is sparsely connected up until the fifth time frame. By the seventh time frame, very few new accounts are beginning to interact with the network. Previously previously participating Twitter users are almost exclusively interacting with those in the network where a plurality of those users began participating over the course of the 28th of October, or the day of the protest. This tentatively supports the Twitter Revolution theory. 
 
-
+#### Comparitive Measures 
 ![Network Overall Connectivity](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/NetworkOverallConnectivity.png)
 The degree distribution of the overall network shows both the cumulative frequency and frequency of each possible value of degree. The degree distribution approximately follows the power law which supports our description of the network as scale-free.
 
@@ -96,15 +96,9 @@ This distribution represents sentiment score of a connection in the whole networ
 Similarities are shown among the fifteen largest components. Subsetting the fifteen largest components into positive and negative interactions preserves the structures of the network. We then show the largest connected component which is the focus of our study. 
 
 ![LCCConnectivity](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCConnectivity.png)
-The degree distribution of the largest connected component shows both the cumulative frequency and frequency of each possible value of degree. The degree distribution approximately follows the power law which supports our description of the largest connected component as scale-free. We do not see any departure from the trend in overall network. A full breakdown of the centrality in this component can be found [here](CentralityTable). Even greater detail on the total number of interactions between unique pairs of Twitter users can be found [here](InteractionTweets).
+The degree distribution of the largest connected component shows both the cumulative frequency and frequency of each possible value of degree. The degree distribution approximately follows the power law which supports our description of the largest connected component as scale-free. We do not see any departure from the trend in overall network. A full breakdown of the centrality in this component can be found [here](CentralityTable). Even greater detail on the total number of interactions between unique pairs of Twitter users can be found [here](InteractionTweets). [Here is a subgraph of another component in the overall network](vN).
 
 ![WeightsLCCHist](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/WeightsLCCHist.png)
-
-
-
-##### Need to insert this Widget somewhere...
-
-[Link to vN](vN).
 
 
 ### Main Findings
