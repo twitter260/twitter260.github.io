@@ -29,7 +29,7 @@ tweets_df <- tbl_df(map_df(tweets, as.data.frame))
 
 This processess the Tweets obtained during the analysis.
 
-```{r}
+```{r, eval = FALSE}
 #load packages
 x <- c("readr", "stringr", "plyr", "tm", "stringi", "stringr", "tm", "RCurl")
 lapply(x, require, character.only = T)
@@ -756,9 +756,6 @@ ggplot() +
              alpha=1/3) +  
   geom_label_repel(data=unique(Dat[Dat$size>15,c(1,2,6,7)]),
                    aes(x=x, y=y, label=vertex.names), 
-                   size=2, color="#8856a7") +   
-  geom_label_repel(data=unique(Dat[Dat$power>0.10,c(1,2,6,7)]),
-                   aes(x=x, y=y, label=vertex.names), 
                    size=2, color="#8856a7") +
   theme_blank() +
   theme(legend.position="none") -> gg
@@ -768,8 +765,8 @@ gg
 Content from the largest characters
 
 ```{r}
-top <- unique(Dat[Dat$size>15,7])
-tweetstops <- read.csv("murfreesboro102817.csv", stringsAsFactors = F)
+top <- unique(Dat[Dat$size>15,6])
+tweetstops <- read.csv("https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/murfreesboro102817.csv", stringsAsFactors = F)
 tweetstops <- tweetstops %>% filter(replyToSN %in% top | screenName %in% top) 
 replace_reg <- "https://t.co/[A-Za-z\\d]+|http://[A-Za-z\\d]+|&amp;|&lt;|&gt;|RT|https"
 for(i in 1:length(tweetstops[,1])){
@@ -820,4 +817,34 @@ gg
 ```
 
 
+```{r}
+library(visNetwork)
+comps <- as.numeric(names(sort(table(V(g.w)$comp), decreasing = T)[3]))
+ind <- which(V(g.w)$comp %in% comps)
+three <- induced_subgraph(g.w,ind)
+
+#interactive network
+set.seed(1492)
+nodes <- data.frame(id = as.character(V(three)$name))
+E(three)$weight <- abs(E(three)$weight)
+nodes$group <- cluster_fast_greedy(three)$membership
+V(three)$size <- igraph::degree(three)
+nodes$font.size <- 20
+nodes$size <- V(three)$size
+edges <- data.frame(get.edgelist(three))
+colnames(edges)<-c("from","to")
+
+# Plot with defaut layout
+vN <- visNetwork(nodes, edges, height = "600px") %>%
+  visIgraphLayout() %>%
+  visNodes(size = nodes$size*3) %>%
+  visOptions(selectedBy = "group", 
+             highlightNearest = TRUE, 
+             nodesIdSelection = TRUE) %>%  
+  visInteraction(keyboard = TRUE,
+                 dragNodes = T, 
+                 dragView = T, 
+                 zoomView = T)
+vN
+```
 
