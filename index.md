@@ -24,13 +24,14 @@ In this project we attempted to codify and quantify the “Twitter Revolution”
 * Look at the sentiment score of each tweet and the network of interactions among Twitter accounts.
 * Identify “key-players” in the communication network by using hub scores to identify the accounts with the highest degree of influence.
 
+
 ## Data Methodology
 
 #### Source
 We first set out to see if people in Charlottesville who were actively tweeting during the event were collectively organizing and either influencing or reacting to the event through their content. However, due to limitations of Twitter’s API, we had to use another protest for the basis of our analysis.
 
 #### Scraping 
-Using the twitteR package developed by Jeff Gentry, we accessed the Twitter Streaming API and obtained all tweets between 00:00:01 October 27, 2017 and 23:59:59 October 29, 2017. The data represents 65,955 different tweets from 22,209 unique Twitter accounts. To further simplify our analysis, we rounded time into 15 minute increments.   
+Using the twitteR package developed by Jeff Gentry, we accessed the Twitter Streaming API and obtained all tweets between 00:00:01 October 27, 2017 and 23:59:59 October 29, 2017. The data represents 65,955 different tweets from 22,209 unique Twitter accounts. To further simplify our analysis, we rounded time into 15 minute increments.     
 
 #### Cleanup
 Stopwords,  UTF-8 emojis, punctuation, replies (@), retweets, linefeeds, and URLs were removed from tweets using regular expression functions. 
@@ -44,7 +45,7 @@ Using the tidytext R package, we used the following data sets were used for the 
 
 * nrc sentiments: this dataset groups assigns each word one or more general sentiments from the following list: surprise, joy, fear, anger, anticipation, negative, positive, trust, sadness or disgust.  For example, the word “fun” is assigned the sentiments “joy”, “anticipation” and “positive”, while the word “horrible” is assigned the sentiments “anger”, “disgust”, “fear” and “negative”.
 
-From our dataset of tweets, we used the afinn and nrc datasets (separately) to assign each tweet a sentiment, and then explore how the sentiments changed both quantitatively and qualitatively over time.  In addition, building on the network analysis, we subsetted the tweets dataset by network neighborhood to explore the general sentiment for different neighborhoods over time.
+From our dataset of tweets, we used the afinn and nrc datasets (separately) to assign each tweet a sentiment(s), and then explore how the sentiments changed both quantitatively and qualitatively over time.  In addition, building on the network analysis, we subsetted the tweets dataset by network neighborhood to explore the general sentiment for different neighborhoods over time.
 
 
 ### Network
@@ -60,13 +61,13 @@ A large disconnected network formed between October 27th and October 29th. Focus
 ### Sentiment Analysis
 
 ![saturday_sentiment_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/saturday_sentiment_time.png)
-The average twitter sentiment throughout the day during the rally. The size of the points is proportional to the number of tweets in each 15 minute interval, and the color of each point indicates of whether the mean sentiment is positive or negative for that interval.
+The average twitter sentiment throughout the day during the rally.  The size of the points is proportional to the number of tweets in each 15 minute interval, and the color of each point indicates of whether the mean sentiment is positive or negative for that interval.
 
 ![sentiment_time_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_time_network.png)
-Again the average sentiment over time is plotted against time. However, the dataset is reduced to those tweets that were part of the largest network neighborhoods based on user interaction (tweets and/or replies). The dataset is then separated into network neighborhoods to examine the average sentiment for each neighborhood over the course of the day
+Again the average sentiment over time is plotted against time.  However, the dataset is reduced to those tweets that were part of the largest network neighborhoods based on user interaction (tweets and/or replies).  The plots are then faceted  by network neighborhoods and fit with loess curves to examine the change in sentiment for each neighborhood over the course of the day
 
 ![trump_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/trump_network.png)
-This plot represents the average sentiment of the persons tweeting at Donald Trump during the White Lives Matter rally.  Interestingly, the sentiment if higher before the first rally in Shelbyville, and lowest when the Murfreesboro rally fails to manifest, which is the opposite of the general trend seen in the plot of all twitter users in the Murfreesboro/Shelbyville area.
+This plot represents the average sentiment of the persons tweeting in Donald Trump’s twitter network during the White Lives Matter rally.  Interestingly, the sentiment if highest before the first rally in Shelbyville, and lowest when the Murfreesboro rally fails to manifest, which contrasts the general trend seen in the plot of all twitter users in the Murfreesboro/Shelbyville area.
 
 ![sentiment_share](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_share.png)
 This plot shows the share of sentiments expressed that were classified as “anticipation” or “fear”.  The size of each point is representative of the number of each sentiments expressed in that particular 15 minute interval for both anticipation and fear.  A clear increase in the share of anticipation and fear sentiments is seen in the early stages of the Shelbyville rally, and a similarly dramatic decrease is seen as the second rally in Murfreesboro dissipates. 
@@ -109,5 +110,10 @@ The ten largest hubs are shown on the network. An interactive plot with hub scor
 
 
 ### Main Findings
+* Due to the variety of content, it was difficult to categorize tweets into groups based on verbal content. Instead we used sentiment analysis to quantify tweets. Other considerations were given to location within the catchment area, but spatial data was not precise enough to allow for sentiment analysis by location. 
+* Social networks are complex systems that can evolve indefinitely. Treating the interactions between Twitter accounts in the greater Murfreesboro/Shelbyville area as a single large network was impossible due to structural holes amongst thousands of components, many of which represent only a single pair of Twitter users. Instead, focusing on the largest connected component yielded some useful insights. 
+* The largest connected component contained eighty-three percent of the Twitter accounts and eighty-six percent of connections within the filtered network and preserved many of the topological features
+* Sentiment analysis of twitter data aids understanding of the general attitudes of users, but its functionality is limited by its lack of contextual flexibility.  For example, the word “confederate” carries a negative connotation in the context of the White Lives Matter movement, yet the nrc sentiment dataset assigns “confederate” the sentiments “positive” and “trust”.
+* Juxtaposing the time trends of sentiments for twitter users (both overall and separated by network neighborhood) in the Murfreesboro/Shelbyville area with the timeline of occurrences on the ground provided insight into the general online response to actual events in real time.
 
 
