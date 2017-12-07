@@ -10,7 +10,8 @@ output: html_document
 
 # Video
 
-[![Alt text](https://img.youtube.com/vi/jqNJx9W3ols/0.jpg)](https://www.youtube.com/watch?v=jqNJx9W3ols)
+{% include youtubePlayer.html id=jqNJx9W3ols %}
+
 
 ## Motivation
 Needless to say, 2017 has been a turbulent year: nationalism, hate-crimes, xenophobic attitudes are on the rise and have become even more brazen. The infamous “Unite the Right” rally in the Charlottesville, VA sent shockwaves around the national stage, catalysed several difficult conversations, and escalated violence and the destruction of property. The term “Twitter Revolution” refers to the use of social networking sites by protestors and demonstrators to communicate civil unrest. Parsing data from Twitter (bytes of bigger conversations) can capture fleeting emotions and solidify networks within a subgroup. Social media in rallies has been cited as a potential model for the interactions that occur through conventional means. However, there is conflicting empirical evidence of the efficacy of the Twitter Revolution phenomenon.
