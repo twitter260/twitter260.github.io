@@ -10,7 +10,7 @@ output: html_document
 
 # Video
 
-{% include youtubePlayer.html id=jqNJx9W3ols %}
+{% include youtubePlayer.html id="jqNJx9W3ols" %}
 
 
 ## Motivation
