@@ -65,7 +65,10 @@ This is the overall network representing every Twitter account that was active a
 
 
 ![LCC_hubs](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCC_hubs.png)
-The ten largest hubs are shown on the network. An interactive plot with hub scores and account centrality can be found [here](gi).
+The ten largest hubs are shown on the network. An interactive plot with hub scores and account centrality can is shown below.
+{% include gi.html %}
+
+
 
 ![saturday_sentiment_time](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/saturday_sentiment_time.png)
 The average twitter sentiment throughout the day during the rally.  The size of the points is proportional to the number of tweets in each 15 minute interval, and the color of each point indicates of whether the mean sentiment is positive or negative for that interval.
@@ -74,7 +77,8 @@ The average twitter sentiment throughout the day during the rally.  The size of 
 This plot shows the share of sentiments expressed that were classified as “anticipation” or “fear”.  The size of each point is representative of the number of each sentiments expressed in that particular 15 minute interval for both anticipation and fear.  A clear increase in the share of anticipation and fear sentiments is seen in the early stages of the Shelbyville rally, and a similarly dramatic decrease is seen as the second rally in Murfreesboro dissipates. 
 
 ![LCC examine](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCExamine.png)
-The sixteen most active users are shown on the network. Their activity was determined by the number of connections made between them and other accounts within the network. Content involving these accounts can be found [here](TweetsTops).
+The sixteen most active users are shown on the network. Their activity was determined by the number of connections made between them and other accounts within the network. Content involving these accounts can is below.
+{% include TweetsTops.html %}
 
 
 ![sentiment_time_network](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/sentiment_time_network.png)
@@ -97,7 +101,15 @@ This distribution represents sentiment score of a connection in the whole networ
 Similarities are shown among the fifteen largest components. Subsetting the fifteen largest components into positive and negative interactions preserves the structures of the network. We then show the largest connected component which is the focus of our study. 
 
 ![LCCConnectivity](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/LCCConnectivity.png)
-The degree distribution of the largest connected component shows both the cumulative frequency and frequency of each possible value of degree. The degree distribution approximately follows the power law which supports our description of the largest connected component as scale-free. We do not see any departure from the trend in overall network. A full breakdown of the centrality in this component can be found [here](CentralityTable). Even greater detail on the total number of interactions between unique pairs of Twitter users can be found [here](InteractionTweets). We also show a [subgraph](vN) of another component in the overall network.
+The degree distribution of the largest connected component shows both the cumulative frequency and frequency of each possible value of degree. The degree distribution approximately follows the power law which supports our description of the largest connected component as scale-free. We do not see any departure from the trend in overall network. A full breakdown of the centrality in this component is below. 
+{% include CentralityTable.html %}
+
+Even greater detail on the total number of interactions between unique pairs of Twitter users can be found below. 
+{% include InteractionTweets.html %}
+
+
+We also show a subgraph of another component in the overall network.
+{% include vN.html %}
 
 ![WeightsLCCHist](https://raw.githubusercontent.com/twitter260/twitter260.github.io/master/our_code/Images/WeightsLCCHist.png)
 
